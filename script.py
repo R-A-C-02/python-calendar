@@ -14,6 +14,8 @@ lessons = []
 for row_idx, col_idx in zip(*matches.to_numpy().nonzero()):
     # First cell of the same row (assuming it's column 0)
     hours = df.iloc[row_idx, 0]
+
+    lessons_subject = df.iloc[row_idx, col_idx - 1]
     
     day = ""
 
@@ -35,7 +37,7 @@ for row_idx, col_idx in zip(*matches.to_numpy().nonzero()):
     elif hours == "17.00-18.00":
         day = df.iloc[row_idx - 10, col_idx - 1]
 
-    lessons.append({'hours': hours, 'day': day})
+    lessons.append({'hours': hours, 'day': day, "subject": lessons_subject})
 
 # convert array to dataframe
 df_hours = pd.DataFrame(lessons)
@@ -46,17 +48,26 @@ grouped = df_hours.groupby('day')
 # Print group
 # for date, group in grouped:
 #     print(f"\nDate: {date}")
-#     print(group.hours)
+#     print(group)
 
 # Create calendar
 calendar = Calendar()
 
 for date, group in grouped:
-    for item in group.hours:
-        start_time, end_time = item.split('-')
+    data = group.to_dict('records')
+
+    # save the first start_time useful
+    starting_time = []
+
+    for item in data:
+        start_time, end_time = item['hours'].split('-')
+
+        if(len(data) > data.index(item)+1 and end_time in data[data.index(item)+1]['hours']):
+            starting_time.append(start_time)
+            continue
         
         # Convert times to datetime objects and handle fractional hours
-        start_datetime = datetime.strptime(f"{date.date()} {start_time}", "%Y-%m-%d %H.%M")
+        start_datetime = datetime.strptime(f"{date.date()} {starting_time[0]}", "%Y-%m-%d %H.%M")
         end_datetime = datetime.strptime(f"{date.date()} {end_time}", "%Y-%m-%d %H.%M")
 
         # Calculate the event duration
@@ -64,12 +75,15 @@ for date, group in grouped:
 
         # Create an event
         event = Event()
-        event.name = "Lezione DAITA19"  
+        event.name = item['subject'] 
         event.begin = start_datetime 
         event.duration = duration 
-        
+    
         # Add the event to the calendar
         calendar.events.add(event)
+
+        # Clear starting time array
+        starting_time = []
         
 # Save the calendar to an .ics file
 with open('lessons.ics', 'w') as f:
