@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 import pandas as pd
 from ics import Calendar, Event
 
@@ -67,8 +67,8 @@ for date, group in grouped:
             continue
         
         # Convert times to datetime objects and handle fractional hours
-        start_datetime = datetime.strptime(f"{date.date()} {starting_time[0]}", "%Y-%m-%d %H.%M")
-        end_datetime = datetime.strptime(f"{date.date()} {end_time}", "%Y-%m-%d %H.%M")
+        start_datetime = datetime.strptime(f"{date.date()} {starting_time[0]}", "%Y-%m-%d %H.%M") - timedelta(hours=2)
+        end_datetime = datetime.strptime(f"{date.date()} {end_time}", "%Y-%m-%d %H.%M") - timedelta(hours=2)
 
         # Calculate the event duration
         duration = end_datetime - start_datetime
