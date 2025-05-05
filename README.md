@@ -12,3 +12,6 @@ Change the row and column index if you want to use this script on your own XLSX 
 1. `source env/bin/activate`
 1. `python3 -m pip install -r requirements.txt`
 1. `python3 script.py`
+
+
+# modifica aggiutniva senza senso
